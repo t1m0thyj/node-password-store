@@ -36,7 +36,7 @@ describe("password-store", () => {
         expect(credentials.length).toBe(4);
         expect(credentials[0].account).toBeDefined();
         expect(credentials[0].password).toBeDefined();
-        expect(credentials).toMatchSnapshot();
+        expect(credentials.sort()).toMatchSnapshot();
     });
 
     it("findPassword for ASCII string", async () => {
