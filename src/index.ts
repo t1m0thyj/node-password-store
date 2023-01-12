@@ -53,7 +53,7 @@ export class PasswordStore {
         const passwordFile = path.join(this.passwordStoreDir, service, account) + ".gpg";
         if (fs.existsSync(passwordFile)) {
             const ring = new this.kbpgp.keyring.KeyRing();
-			ring.add_key_manager(this.keyManager);
+            ring.add_key_manager(this.keyManager);
             return new Promise((resolve, reject) => {
                 this.kbpgp.unbox(
                     { keyfetch: ring, raw: fs.readFileSync(passwordFile) },

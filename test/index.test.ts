@@ -44,11 +44,6 @@ describe("password-store", () => {
         expect(password).toBe("ASCII string");
     });
 
-    it("findPassword for ASCII string", async () => {
-        const password = await passApi.findPassword("TestKeytar/TestASCII");
-        expect(password).toBe("ASCII string");
-    });
-
     it("findPassword for mixed character set", async () => {
         const password = await passApi.findPassword("TestKeytar/TestCharSet");
         expect(password).toBe("I 💔 ASCII");
