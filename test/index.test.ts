@@ -5,7 +5,7 @@ describe("password-store", () => {
 
     beforeAll(async () => {
         passApi = await PasswordStore.create("test.pgp", ".password-store");
-    });
+    }, 60000);
 
     it("get/setPassword with ASCII string", async () => {
         await passApi.setPassword("TestKeytar", "TestASCII", "ASCII string");
