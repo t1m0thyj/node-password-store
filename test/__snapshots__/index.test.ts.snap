@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`password-store findCredentials prints credentials in test service and verifies member names 1`] = `
+[
+  {
+    "account": "TestASCII",
+    "password": "ASCII string",
+  },
+  {
+    "account": "TestCharSet",
+    "password": "I 💔 ASCII",
+  },
+  {
+    "account": "TestCJK",
+    "password": "「こんにちは世界」",
+  },
+  {
+    "account": "TestUTF16",
+    "password": "🌞🌙🌟🌴",
+  },
+]
+`;

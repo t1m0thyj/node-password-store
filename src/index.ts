@@ -9,7 +9,7 @@ export class PasswordStore {
 
     private constructor(private privateKeyFile: string, passwordStoreDir?: string) {
         this.kbpgp = require("kbpgp");
-        this.passwordStoreDir = passwordStoreDir ?? path.join(os.homedir(), ".password-store");
+        this.passwordStoreDir = fs.realpathSync(passwordStoreDir ?? path.join(os.homedir(), ".password-store"));
     }
 
     public static async create(privateKeyFile: string, passwordStoreDir?: string): Promise<PasswordStore> {

@@ -6,8 +6,9 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint src",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "tsc -w"
+    "test": "jest",
+    "watch": "tsc -w",
+    "prepare": "npm run build"
   },
   "keywords": [],
   "author": "",
@@ -20,10 +21,13 @@
     "kbpgp": "2.1.15"
   },
   "devDependencies": {
+    "@types/jest": "^29.2.5",
     "@types/node": "^18.11.18",
     "@typescript-eslint/eslint-plugin": "^5.48.1",
     "@typescript-eslint/parser": "^5.48.1",
     "eslint": "^8.31.0",
+    "jest": "^29.3.1",
+    "ts-jest": "^29.0.4",
     "typescript": "^4.9.4"
   }
 }
