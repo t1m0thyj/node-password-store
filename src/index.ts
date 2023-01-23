@@ -13,6 +13,7 @@ export class PasswordStore {
     }
 
     public static async create(privateKeyFile: string, passwordStoreDir?: string): Promise<PasswordStore> {
+        // TODO Prompt for private key passphrase?
         const instance = new PasswordStore(privateKeyFile, passwordStoreDir);
         if (fs.existsSync(instance.privateKeyFile)) {
             return new Promise((resolve, reject) => {
@@ -25,7 +26,6 @@ export class PasswordStore {
                 });
             });
         } else {
-            // TODO Prompt for private key passphrase?
             return new Promise((resolve, reject) => {
                 instance.kbpgp.KeyManager.generate_rsa({
                     userid: os.userInfo().username
