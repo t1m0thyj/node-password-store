@@ -3,8 +3,8 @@ import { PasswordStore } from "../src";
 describe("password-store", () => {
     let passApi: PasswordStore;
 
-    beforeAll(async () => {
-        passApi = await PasswordStore.create("test.pgp", ".password-store");
+    beforeAll(() => {
+        passApi = PasswordStore.create("test.pgp", ".password-store");
     }, 60000);
 
     it("get/setPassword with ASCII string", async () => {
