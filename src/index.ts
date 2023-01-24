@@ -2,51 +2,61 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 
+type DeferredPromise = {
+  promise: Promise<unknown>;
+  reject: any;
+  resolve: any;
+};
+
+const createDeferredPromise = (): DeferredPromise => {
+  let resolve, reject;
+  const promise = new Promise((res, rej) => {
+    [resolve, reject] = [res, rej];
+  });
+  return { promise, reject, resolve };
+};
+
 export class PasswordStore {
   private kbpgp: any;
   private keyManager: any;
   private passwordStoreDir: string;
+  private deferred: DeferredPromise;
 
-  private constructor(
+  public constructor(
     private privateKeyFile: string,
     passwordStoreDir?: string
   ) {
     this.kbpgp = require("kbpgp");
     this.passwordStoreDir =
       passwordStoreDir ?? path.join(os.homedir(), ".password-store");
-  }
+    this.deferred = createDeferredPromise();
 
-  public static create(
-    privateKeyFile: string,
-    passwordStoreDir?: string
-  ): PasswordStore {
-    // TODO Prompt for private key passphrase?
-    const instance = new PasswordStore(privateKeyFile, passwordStoreDir);
-    if (fs.existsSync(instance.privateKeyFile)) {
-      instance.kbpgp.KeyManager.import_from_armored_pgp(
+    if (fs.existsSync(this.privateKeyFile)) {
+      this.kbpgp.KeyManager.import_from_armored_pgp(
         {
-          armored: fs.readFileSync(instance.privateKeyFile, "utf-8"),
+          armored: fs.readFileSync(this.privateKeyFile, "utf-8"),
         },
         (err: Error | null, key: any) => {
           if (err) return null;
-          instance.keyManager = key;
+          this.keyManager = key;
+          this.deferred.resolve();
         }
       );
     } else {
-      instance.kbpgp.KeyManager.generate_rsa(
+      this.kbpgp.KeyManager.generate_rsa(
         {
           userid: os.userInfo().username,
         },
         (err: Error | null, key: any) => {
           if (err) return null;
-          instance.keyManager = key;
+          this.keyManager = key;
           key.sign({}, (err: Error | null) => {
             if (err) return null;
             key.export_pgp_private(
               {},
               (err: Error | null, pgpPrivate: string) => {
                 if (err) return null;
-                fs.writeFileSync(instance.privateKeyFile, pgpPrivate, {
+                fs.writeFileSync(this.privateKeyFile, pgpPrivate, {
                   mode: 0o600,
                 });
                 key.export_pgp_public(
@@ -54,10 +64,11 @@ export class PasswordStore {
                   (err: Error | null, pgpPublic: string) => {
                     if (err) return null;
                     fs.writeFileSync(
-                      instance.privateKeyFile + ".pub",
+                      this.privateKeyFile + ".pub",
                       pgpPublic,
                       { mode: 0o644 }
                     );
+                    this.deferred.resolve();
                   }
                 );
               }
@@ -66,11 +77,13 @@ export class PasswordStore {
         }
       );
     }
-
-    return instance;
   }
 
-  public getPassword(service: string, account: string): Promise<string | null> {
+  public async getPassword(
+    service: string,
+    account: string
+  ): Promise<string | null> {
+    await this.deferred.promise;
     const passwordFile =
       path.join(this.passwordStoreDir, service, account) + ".gpg";
     if (fs.existsSync(passwordFile)) {
@@ -90,11 +103,12 @@ export class PasswordStore {
     }
   }
 
-  public setPassword(
+  public async setPassword(
     service: string,
     account: string,
     password: string
   ): Promise<void> {
+    await this.deferred.promise;
     const passwordFile =
       path.join(this.passwordStoreDir, service, account) + ".gpg";
     fs.mkdirSync(path.dirname(passwordFile), { mode: 0o700, recursive: true });
@@ -112,7 +126,11 @@ export class PasswordStore {
     });
   }
 
-  public deletePassword(service: string, account: string): Promise<boolean> {
+  public async deletePassword(
+    service: string,
+    account: string
+  ): Promise<boolean> {
+    await this.deferred.promise;
     // TODO Verify key before deletion?
     const passwordFile =
       path.join(this.passwordStoreDir, service, account) + ".gpg";
@@ -128,9 +146,10 @@ export class PasswordStore {
     }
   }
 
-  public findCredentials(
+  public async findCredentials(
     service: string
   ): Promise<{ account: string; password: string }[]> {
+    await this.deferred.promise;
     const serviceDir = path.join(this.passwordStoreDir, service);
     const credentials: { account: string; password: string }[] = [];
     return new Promise((resolve, reject) => {
