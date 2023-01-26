@@ -1,12 +1,11 @@
 import { PasswordStore } from "../src";
 
-jest.setTimeout(60000);
 describe("password-store", () => {
     let passApi: PasswordStore;
 
-    beforeEach(() => {
-        passApi = new PasswordStore("test.pgp", ".password-store");
-    });
+    beforeEach(async () => {
+        passApi = await PasswordStore.create("test.pgp", ".password-store");
+    }, 60000);
 
     it("get/setPassword with ASCII string", async () => {
         await passApi.setPassword("TestKeytar", "TestASCII", "ASCII string");
